@@ -1,0 +1,55 @@
+Datasets for Text Classification
+
+    IMDB Reviews
+        imdb
+
+    AG News
+        ag_news
+
+    DBPedia
+        dbpedia_14
+
+    Yahoo Answers
+        yahoo_answers_topics
+
+    SST-2 (Stanford Sentiment Treebank)
+        glue, subset sst2
+
+Pretrained Models for Text Classification
+
+    BERT
+        bert-base-uncased
+        bert-large-uncased
+
+    RoBERTa
+        roberta-base
+        roberta-large
+
+    DistilBERT
+        distilbert-base-uncased
+
+    XLNet
+        xlnet-base-cased
+
+    ALBERT
+        albert-base-v2
+        albert-large-v2
+
+    Electra
+        google/electra-small-discriminator
+        google/electra-base-discriminator
+
+    DeBERTa
+        microsoft/deberta-base
+        microsoft/deberta-large
+
+    BART
+        facebook/bart-base
+
+    GPT-2
+        gpt2
+        gpt2-medium
+
+    T5
+        t5-small
+        t5-base

@@ -1,0 +1,18 @@
+training_args:
+  output_dir : './results'
+  max_steps : 20
+  #num_train_epochs: 5
+  #per_device_train_batch_size : 1
+  #per_device_eval_batch_size : 1
+  per_device_train_batch_size : 2
+  per_device_eval_batch_size : 2
+  warmup_steps : 500
+  weight_decay : 0.01
+  logging_dir : './logs'
+  eval_strategy: "steps"
+  report_to: "none"
+lora_args:
+  r: 128
+  lora_alpha: 32
+  lora_dropout: 0.
+

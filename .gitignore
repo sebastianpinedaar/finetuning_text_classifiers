@@ -1,0 +1,6 @@
+data/*
+logs/*
+results/*
+wandb/*
+slurm_logs/*
+__pycache__/*
