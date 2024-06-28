@@ -5,16 +5,15 @@ os.environ["HF_HOME"] = "/cephfs/workspace/v101be15-finetuning"
 os.environ['TRANSFORMERS_CACHE'] = "/cephfs/workspace/v101be15-finetuning"
 
 from transformers import  Trainer, TrainingArguments
-from datasets import load_dataset
 import argparse
 import pandas as pd
 from pathlib import Path
 import argparse
 import yaml
 
-from utils import get_model_and_tokenizer_for_classification,  \
-                    get_text_and_label_field, get_tokenize_function, \
-                    get_predictions, get_num_labels
+from utils import TimeCallback
+from utils import get_predictions
+from utils import get_model_tokenizer_dataset
 
 SEED = 42
 
@@ -24,9 +23,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", type=str, default="bert-base-uncased")
     parser.add_argument("--dataset_name", type=str, default="imdb")
+    parser.add_argument("--learning_rate", type=float, default=None)
     parser.add_argument("--lora_r", type=int, default=None)
     parser.add_argument("--experiment_name", type=str, default="test")
     parser.add_argument("--test_size", type=float, default=0.2)
+    parser.add_argument("--lora_dropout", type=float, default=None)
+    parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--finetuning_config_file", type=str, default="default_finetuning_args")
     args = parser.parse_args()
 
@@ -37,37 +39,39 @@ if __name__ == "__main__":
     finetuning_config = args.finetuning_config_file
     lora_r = args.lora_r
     test_size = args.test_size
+    max_length = args.max_length
+    learning_rate = args.learning_rate
+    lora_dropout = args.lora_dropout
+    is_test = experiment_name.startswith("test")
 
     with open(current_path / "config" / (finetuning_config+".yml"), 'r') as file:
         finetuning_args = yaml.safe_load(file)
 
     if lora_r is not None:
         finetuning_args["lora_args"]["r"] = lora_r
+
+    if lora_dropout is not None:
+        finetuning_args["lora_args"]["lora_dropout"] = lora_dropout
         
-    # Load and tokenize the dataset
-    train_dataset = load_dataset(dataset_name, split="train")
-    test_dataset = load_dataset(dataset_name, split="test")
-    train_val_split = train_dataset.train_test_split(test_size=test_size)
-    train_dataset = train_val_split["train"]
-    val_dataset = train_val_split["test"]
+    if learning_rate is not None:
+        finetuning_args["training_args"]["learning_rate"] = learning_rate
 
-    text_field, label_field = get_text_and_label_field(dataset_name)
-    num_labels = get_num_labels(train_dataset, dataset_name, label_field)
-    model, tokenizer = get_model_and_tokenizer_for_classification(model_name, num_labels=num_labels, lora_args=finetuning_args["lora_args"])
-    tokenize_function = get_tokenize_function(tokenizer, text_field)
-
-    train_dataset = train_dataset.map(tokenize_function, batched=True)
-    val_dataset = val_dataset.map(tokenize_function, batched=True)
-    test_dataset = test_dataset.map(tokenize_function, batched=True)
-
-
-    if experiment_name.startswith("test"):
-        train_dataset = train_dataset.select(range(1000))
-        val_dataset = val_dataset.select(range(1000))
+    time_callback = TimeCallback()
 
     training_args = TrainingArguments(
         **finetuning_args["training_args"]
     )
+
+    (model, tokenizer, train_dataset, 
+     val_dataset, test_dataset, dataset_info) = get_model_tokenizer_dataset(model_name=model_name,
+                                                                  dataset_name=dataset_name,
+                                                                  is_test=is_test,
+                                                                  test_size=test_size,
+                                                                  max_length=max_length,
+                                                                  lora_args=finetuning_args["lora_args"])
+
+    text_field = dataset_info["text_field"]
+    label_field = dataset_info["label_field"]
 
     # Initialize Trainer
     trainer = Trainer(
@@ -75,7 +79,7 @@ if __name__ == "__main__":
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-
+        callbacks=[time_callback]
     )
 
     # Train and evaluate the model
@@ -94,3 +98,4 @@ if __name__ == "__main__":
     test_predictions.to_csv(experiment_path / "test_predictions.csv")    # Prepare DataLoader
 
     pd.DataFrame(trainer.state.log_history).to_csv(experiment_path / "curves.csv")
+    pd.DataFrame(time_callback.epoch_times).to_csv(experiment_path / "times.csv")

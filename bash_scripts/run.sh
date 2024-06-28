@@ -5,7 +5,7 @@
 #SBATCH -o /home/hpc/v101be/v101be15/finetuning_text_classification/slurm_logs/%A-%a.%x.o
 #SBATCH -e /home/hpc/v101be/v101be15/finetuning_text_classification/slurm_logs/%A-%a.%x.e
 #SBATCH --gres=gpu:1
-#SBATCH --array 1-30%5
+#SBATCH --array 1-750%20
 
 
 export PYTHONPATH="${PYTHONPATH}:${HOME}/finetuning_text_classification/"

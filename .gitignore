@@ -4,3 +4,4 @@ results/*
 wandb/*
 slurm_logs/*
 __pycache__/*
+**__pycache__***

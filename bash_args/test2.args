@@ -1,0 +1,3 @@
+--model_name google-t5/t5-large --dataset_name imdb --lora_r 128 --experiment_name test2_24
+--model_name google-t5/t5-large --dataset_name stanfordnlp/sst2 --lora_r 128 --experiment_name test2_26
+--model_name google-t5/t5-large --dataset_name dbpedia_14 --lora_r 128 --experiment_name test2_29

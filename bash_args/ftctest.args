@@ -1,0 +1,6 @@
+--model_name gpt2 --dataset_name imdb --lora_r 128 --experiment_name ftctest_0
+--model_name gpt2 --dataset_name mteb/tweet_sentiment_extraction --lora_r 128 --experiment_name ftctest_1
+--model_name gpt2 --dataset_name ag_news --lora_r 128 --experiment_name ftctest_2
+--model_name gpt2 --dataset_name dbpedia_14 --lora_r 128 --experiment_name ftctest_3
+--model_name gpt2 --dataset_name stanfordnlp/sst2 --lora_r 128 --experiment_name ftctest_4
+--model_name gpt2 --dataset_name SetFit/mnli --lora_r 128 --experiment_name ftctest_5
