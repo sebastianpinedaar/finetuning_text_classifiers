@@ -32,3 +32,14 @@ We create a search space with the following hyperparmaeters.
 * Lora R: `8, 16, 32, 64, 128`.
 
 We generate two metadataset versions: **mini** containing 10% of the data, and **extended**, containing the full data. To generate the metadataset in **mini** version, you can run the scripts with all the arguments in `bash_args/mini_ftc.args`. For the **extended** version use the arguments listed in `bash_args/ftc.args`. Some configurations have failed due to memory limits. We listed them in the files `bash_args/failed_ftc_extended.args` and `bash_args/failed_ftc_mini.args`.
+
+## Download Metadataset
+
+You can skip the generation of the metadataset by downloading them.
+
+```bash
+mkdir data
+cd data
+wget https://rewind.tf.uni-freiburg.de/index.php/s/QGjKFQf42FeZCag/download/ftc.zip
+wget https://rewind.tf.uni-freiburg.de/index.php/s/G2KTnSYcC42gzwK/download/mini.zip
+```
