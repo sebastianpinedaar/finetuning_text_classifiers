@@ -118,17 +118,24 @@ def combine_texts(example):
     example["text"] = f"Text1: {text1}, text2: {text2}"
     return example
 
-def get_model_tokenizer_dataset(model_name, dataset_name, is_test=False, test_size=0.1, max_length=512, lora_args={}):
+def get_model_tokenizer_dataset(model_name, dataset_name, 
+                                test_size=0.1, 
+                                max_length=512, 
+                                pct_train=1., 
+                                seed=42,
+                                lora_args={}):
 
     train_dataset = load_dataset(dataset_name, split="train")
     test_dataset = load_dataset(dataset_name, split="test")
-    train_val_split = train_dataset.train_test_split(test_size=test_size)
+    train_val_split = train_dataset.train_test_split(test_size=test_size,
+                                                    seed=seed)
     train_dataset = train_val_split["train"]
     val_dataset = train_val_split["test"]
 
     if dataset_name in ["SetFit/mnli", "stanfordnlp/sst2"]:
         #This datasets have hidden labels in the test set
-        train_val_split = train_dataset.train_test_split(test_size=test_size)
+        train_val_split = train_dataset.train_test_split(test_size=test_size,
+                                                         seed=seed)
         train_dataset = train_val_split["train"]
         test_dataset = train_val_split["test"]       
     
@@ -146,13 +153,13 @@ def get_model_tokenizer_dataset(model_name, dataset_name, is_test=False, test_si
     val_dataset = val_dataset.map(tokenize_function, batched=True)
     test_dataset = test_dataset.map(tokenize_function, batched=True)
 
+    if pct_train < 1.:
+        train_size = pct_train*len(train_dataset)
+        train_dataset = train_dataset.shuffle(seed=seed).select(range(int(train_size)))
+
     dataset_info = {
         "text_field" : text_field,
         "label_field" : label_field
     }
-
-    if is_test:
-        train_dataset = train_dataset.select(range(1000))
-        val_dataset = val_dataset.select(range(1000))
 
     return model, tokenizer, train_dataset, val_dataset, test_dataset, dataset_info

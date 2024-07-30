@@ -1,6 +1,5 @@
---model_name gpt2 --dataset_name imdb --lora_r 128 --experiment_name ftctest_0
---model_name gpt2 --dataset_name mteb/tweet_sentiment_extraction --lora_r 128 --experiment_name ftctest_1
---model_name gpt2 --dataset_name ag_news --lora_r 128 --experiment_name ftctest_2
---model_name gpt2 --dataset_name dbpedia_14 --lora_r 128 --experiment_name ftctest_3
---model_name gpt2 --dataset_name stanfordnlp/sst2 --lora_r 128 --experiment_name ftctest_4
---model_name gpt2 --dataset_name SetFit/mnli --lora_r 128 --experiment_name ftctest_5
+--model_name gpt2 --dataset_name ag_news --pct_train 0.1 --lora_r 8 --experiment_name ftctest_0 --learning_rate 0.005 --finetuning_config_file small_finetuning_args
+--model_name gpt2 --dataset_name ag_news --pct_train 0.1 --lora_r 16 --experiment_name ftctest_1 --learning_rate 0.005 --finetuning_config_file small_finetuning_args
+--model_name gpt2 --dataset_name ag_news --pct_train 0.1 --lora_r 32 --experiment_name ftctest_2 --learning_rate 0.005 --finetuning_config_file small_finetuning_args
+--model_name gpt2 --dataset_name ag_news --pct_train 0.1 --lora_r 64 --experiment_name ftctest_3 --learning_rate 0.005 --finetuning_config_file small_finetuning_args
+--model_name gpt2 --dataset_name ag_news --pct_train 0.1 --lora_r 128 --experiment_name ftctest_4 --learning_rate 0.005 --finetuning_config_file small_finetuning_args

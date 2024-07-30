@@ -31,4 +31,4 @@ We create a search space with the following hyperparmaeters.
 * Learning rate: ` 0.005, 0.001, 0.0005, 0.0001, 0.00001`.
 * Lora R: `8, 16, 32, 64, 128`.
 
-To generate the metadataset, you can run the scripts with all the arguments in `bash_args/ftc.args`.
+We generate two metadataset versions: **mini** containing 10% of the data, and **extended**, containing the full data. To generate the metadataset in **mini** version, you can run the scripts with all the arguments in `bash_args/mini_ftc.args`. For the **extended** version use the arguments listed in `bash_args/ftc.args`. Some configurations have failed due to memory limits. We listed them in the files `bash_args/failed_ftc_extended.args` and `bash_args/failed_ftc_mini.args`.

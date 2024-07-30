@@ -264,7 +264,7 @@ class BaseMetaDataset:
         """
 
         self.dataset_name = dataset_name
-        self.split = split or self.split
+        self.split = split
         self.hp_candidates, self.hp_candidates_ids = self._get_hp_candidates_and_indices()
         (
             self.worst_performance,

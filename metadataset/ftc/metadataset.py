@@ -4,7 +4,7 @@ import torch
 from pathlib import Path
 from collections import defaultdict
 
-from .ftc_args import ftc_args
+from .ftc_args import ftc_args, ftctest_args, mini_ftc_args
 from .hub import MODELS, DATASETS
 from ..evaluator import Evaluator
 
@@ -19,17 +19,16 @@ class FTCMetadataset(Evaluator):
         split: str = "valid",
         metric_name: str = "error",
         meta_split_ids: tuple[tuple, tuple, tuple] = ((0, 1, 2), (3,), (4,)),
-        data_version: str = None, 
+        data_version: str = "mini", 
         device: str = 'cpu',
         **kwargs
     ):
-        self.data_dir = data_dir
         self.seed = seed
         self.split = split
         self.metric_name = metric_name
         self.data_version = data_version
         self.models = MODELS
-  
+        
         super().__init__(
             data_dir=data_dir,
             meta_split_ids=meta_split_ids,
@@ -39,7 +38,14 @@ class FTCMetadataset(Evaluator):
             device=device,
             data_version=data_version
         )
-        self.data_dir = Path(data_dir)
+
+        if self.data_version == "mini":
+            self.data_dir = Path(data_dir) / "mini"
+        elif self.data_version == "extended":
+            self.data_dir = Path(data_dir) / "ftc"
+        else:
+            raise ValueError("Data version is not valid.")
+        
         self.files = ["times.csv",
                      "test_predictions.csv",
                      "val_predictions.csv"]
@@ -47,6 +53,8 @@ class FTCMetadataset(Evaluator):
         self._initialize()
 
     def get_dataset_names(self):
+        if self.data_version == "ftctest":
+            return ["ag_news"]
         return DATASETS.copy()
     
     def _load_predictions(self, config_id):
@@ -65,14 +73,22 @@ class FTCMetadataset(Evaluator):
     
     def export_failed_configs(self, args_path):
 
-        with open(args_path+'/failed_ftc.args', 'w') as file:
+        with open(args_path+f'/failed_ftc_{self.data_version}.args', 'w') as file:
             # Write each sentence to the file
             for arg in self.failed_configs:
                 arg += f" --finetuning_config_file failed_finetuning_args"
                 file.write(arg + '\n')
 
     def _load_data(self):
-        args_dict, args_list = ftc_args(experiment_name="ftc")
+        if self.data_version == "ftctest":
+            args_dict, args_list = ftctest_args("ftctest")
+        elif self.data_version == "mini":
+            args_dict, args_list = mini_ftc_args("mini_ftc")
+        elif self.data_version == "extended":
+            args_dict, args_list = ftc_args("ftc")
+        else:
+            raise ValueError("No valid data version.")
+        
         self.val_predictions = defaultdict(list)
         self.test_predictions = defaultdict(list)
         self.times = defaultdict(list)
@@ -90,10 +106,16 @@ class FTCMetadataset(Evaluator):
 
             if data is not None:
                 times, test_predictions, val_predictions = data
-                self.times[dataset_name].append(times.T.unsqueeze(0))
-                self.val_predictions[dataset_name].append(val_predictions.unsqueeze(0))
-                self.test_predictions[dataset_name].append(test_predictions.unsqueeze(0))
-                self.all_hp_candidates[dataset_name].append(config)
+
+                if test_predictions.isnan().sum()>0 or \
+                    val_predictions.isnan().sum()>0:
+                    self.failed_hps[dataset_name].append(config)
+                    self.failed_configs.append(bash_args)
+                else:
+                    self.times[dataset_name].append(times.T.unsqueeze(0))
+                    self.val_predictions[dataset_name].append(val_predictions.unsqueeze(0))
+                    self.test_predictions[dataset_name].append(test_predictions.unsqueeze(0))
+                    self.all_hp_candidates[dataset_name].append(config)
             else:
                 self.failed_hps[dataset_name].append(config)
                 self.failed_configs.append(bash_args)
@@ -140,6 +162,15 @@ class FTCMetadataset(Evaluator):
     def get_num_classes(self) -> int:
         return self.val_predictions[self.dataset_name].shape[-1]
 
+    def get_num_samples(self) -> int:
+        if self.split == "valid":
+            return self.val_targets[self.dataset_name].shape[-2]
+        elif self.split == "test":
+            return self.test_targets[self.dataset_name].shape[-2]
+        else:
+            raise NameError("Split name is not specified.")
+
+
     def _get_worst_and_best_performance(self) -> tuple[torch.Tensor, torch.Tensor]:
         _, hp_candidates_ids = self._get_hp_candidates_and_indices()
         unique_pipelines = hp_candidates_ids.unsqueeze(0).T.tolist()
@@ -163,13 +194,4 @@ class FTCMetadataset(Evaluator):
         pred = torch.nn.Softmax(dim=-1)(pred[torch.LongTensor(ensembles)])
         
         return pred
-
-    def _get_worst_and_best_performance(self) -> tuple[torch.Tensor, torch.Tensor]:
-        #TODO: search the actual worst and best values
-        unique_pipelines = self.hp_candidates_ids.unsqueeze(0).T.tolist()
-        _, metrics, _, _ = self.evaluate_ensembles(unique_pipelines)
-
-        self.worst_performance = metrics.max().item()
-        self.best_performance = metrics.min().item()
-        return self.worst_performance, self.best_performance
     

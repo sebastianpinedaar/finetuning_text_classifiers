@@ -1,8 +1,9 @@
 #how to save the predictino per dataset?
 import os
-os.environ["HF_DATASETS_CACHE"] = "/cephfs/workspace/v101be15-finetuning"
-os.environ["HF_HOME"] = "/cephfs/workspace/v101be15-finetuning"
-os.environ['TRANSFORMERS_CACHE'] = "/cephfs/workspace/v101be15-finetuning"
+workspace_path = "/anvme/workspace/v101be15-ftc_data"
+os.environ["HF_DATASETS_CACHE"] = workspace_path
+os.environ["HF_HOME"] = workspace_path
+os.environ['TRANSFORMERS_CACHE'] = workspace_path
 
 from transformers import  Trainer, TrainingArguments
 import argparse
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_size", type=float, default=0.2)
     parser.add_argument("--lora_dropout", type=float, default=None)
     parser.add_argument("--max_length", type=int, default=512)
+    parser.add_argument("--pct_train", type=float, default=1.)
     parser.add_argument("--finetuning_config_file", type=str, default="default_finetuning_args")
     args = parser.parse_args()
 
@@ -42,6 +44,8 @@ if __name__ == "__main__":
     max_length = args.max_length
     learning_rate = args.learning_rate
     lora_dropout = args.lora_dropout
+    pct_train = args.pct_train
+
     is_test = experiment_name.startswith("test")
 
     with open(current_path / "config" / (finetuning_config+".yml"), 'r') as file:
@@ -65,9 +69,9 @@ if __name__ == "__main__":
     (model, tokenizer, train_dataset, 
      val_dataset, test_dataset, dataset_info) = get_model_tokenizer_dataset(model_name=model_name,
                                                                   dataset_name=dataset_name,
-                                                                  is_test=is_test,
                                                                   test_size=test_size,
                                                                   max_length=max_length,
+                                                                  pct_train=pct_train,
                                                                   lora_args=finetuning_args["lora_args"])
 
     text_field = dataset_info["text_field"]
