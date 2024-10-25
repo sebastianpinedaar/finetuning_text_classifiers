@@ -43,7 +43,7 @@ cd data
 wget https://rewind.tf.uni-freiburg.de/index.php/s/QGjKFQf42FeZCag/download/ftc.zip
 wget https://rewind.tf.uni-freiburg.de/index.php/s/G2KTnSYcC42gzwK/download/mini.zip
 ```
-## Evaluate metadataset
+## Evaluate Metadataset
 
 After downloading the data, you can simulate ensembles by using an *FTCMetadataset* object, as shown below.
 
@@ -63,7 +63,7 @@ ensemble_score = output[1]
 per_pipeline_score = output[2]
 ```
 
-## Cite us
+## Citation
 
 If this repo is helpful to you, consider citing us.
 
