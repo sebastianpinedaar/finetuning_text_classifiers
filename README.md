@@ -5,7 +5,7 @@ A simple code-base for finetuning Large Language Models for classification tasks
 ## Install
 
 ```bash
-conda -n quick_tune python=3.10
+conda -n ftc python=3.10
 conda activate ftc
 pip install -r requirements.txt
 ```

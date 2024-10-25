@@ -1,4 +1,3 @@
-#how to save the predictino per dataset?
 import os
 workspace_path = "/anvme/workspace/v101be15-ftc_data"
 os.environ["HF_DATASETS_CACHE"] = workspace_path
