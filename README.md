@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## Run finetuning pipeline
 
-You can generate data for a specific configuration by running the finetuning script `finetune.py`.
+You can generate data for a specific configuration by running the finetuning script `finetune.py`. Remember to change the path to save the HuggingFace data and models , i.e. variable *workspace_path*.
 
 ```bash
 python finetune.py --model_name gpt2 --dataset_name imdb --lora_r 8 --learning_rate 0.005 --experiment_name ftc_0
