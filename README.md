@@ -43,3 +43,37 @@ cd data
 wget https://rewind.tf.uni-freiburg.de/index.php/s/QGjKFQf42FeZCag/download/ftc.zip
 wget https://rewind.tf.uni-freiburg.de/index.php/s/G2KTnSYcC42gzwK/download/mini.zip
 ```
+## Evaluate metadataset
+
+After downloading the data, you can simulate ensembles by using an *FTCMetadataset* object, as shown below.
+
+
+```python
+from metadataset.ftc.metadataset import FTCMetadataset
+from pathlib import Path
+
+data_dir = Path(os.path.dirname(os.path.abspath(__file__))) /  "data" 
+data_version = "extended"
+metadataset = FTCMetadataset(data_dir=str(data_dir), metric_name="error",
+                                data_version=data_version)
+metadataset.set_state(dataset_name=metadataset.get_dataset_names()[1]
+                        )
+output = metadataset.evaluate_ensembles([[1,2],[3,4]])
+ensemble_score = output[1]
+per_pipeline_score = output[2]
+```
+
+## Cite us
+
+If this repo is helpful to you, consider citing us.
+
+```bibtex
+@inproceedings{
+arango2024ensembling,
+title={Ensembling Finetuned Language Models for Text Classification},
+author={Sebastian Pineda Arango and Maciej Janowski and Lennart Purucker and Arber Zela and Frank Hutter and Josif Grabocka},
+booktitle={NeurIPS 2024 Workshop on Fine-Tuning in Modern Machine Learning: Principles and Scalability},
+year={2024},
+url={https://openreview.net/forum?id=oeUE4Of8e8}
+}
+```
